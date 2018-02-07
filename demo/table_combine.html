@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Combine Table</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<style>
+.table-class {
+  border-collapse: collapse;
+  margin: 30px auto;
+}
+.table-class, .table-class td {
+  border: 1px solid grey;
+}
+.input-class {
+  margin: 20px auto;
+  display: table;
+}
+.input-class input {
+  margin-left: 20px;
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="input-class">
+    <label>事件输入</label>
+    <input v-model="input_data" @keyup.enter="submitFun">
+  </div>
+  <table class="table-class">
+    <tr>
+      <td>时间</td>
+      <td>事件</td>
+    </tr>
+    <tr v-for="(row, index) in table_data">
+      <td>{{row.time}}</td>
+      <td :rowspan="combine_data[index]" v-if="combine_data[index] != 0">{{row.event}}</td>
+    </tr>
+  </table>
+</div>
+<script>
+  new Vue({
+    el: "#app",
+    data: {
+      input_data: '',
+      table_data: [
+        {
+          'time': '2018/2/3 下午5:14:30',
+          'event': '包子涨价啦'
+        }, {
+          'time': '2018/2/3 下午5:16:30',
+          'event': '玉米降价啦'
+        }, {
+          'time': '2018/2/4 下午5:14:30',
+          'event': '玉米降价啦'
+        }
+      ],
+      combine_data: []
+    },
+    mounted() {
+      this.combineTableFun()
+    },
+    methods: {
+      /**
+       * 提交输入框内容
+       */
+      submitFun() {
+        var date = new Date()
+        this.table_data.push({
+          'time': date.toLocaleDateString() + ' ' + date.toLocaleTimeString(),
+          'event': this.input_data
+        })
+        this.input_data = ''
+        this.combineTableFun()
+      },
+      /**
+       * 合并表格
+       */
+      combineTableFun() {
+        var table_data = this.table_data
+        this.combine_data = []
+        var temp, count = 1
+        /** 填充内容的方法 **/
+        var table_push = (count) => {
+          for (var i = 0; i < count; i ++) {
+            if (i == 0) {
+              this.combine_data.push(count)
+            } else {
+              this.combine_data.push(0)
+            }
+          }
+        }
+        for (var i in table_data) {
+          if (i == 0) {
+            temp = table_data[i].event
+          } else {
+            if (table_data[i].event == temp) {
+              count ++
+              if (i == table_data.length - 1) {
+                table_push(count)
+              }
+            } else {
+              table_push(count)
+              temp = table_data[i].event
+              count = 1
+              if (i == table_data.length - 1) {
+                table_push(count)
+              }
+            }
+          }
+        }
+        console.log(this.combine_data)
+      }
+    }
+  })
+</script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DEMO</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <style type="text/css">
+        .single-checkbox-class {
+            text-align: center;
+            display: inline-block;
+        }
+        .checkbox-class {
+            margin: 10px auto;
+            padding: 10px 20px 10px 10px;
+            cursor: pointer;
+            user-select: none;
+            display: inline-block;
+            border: 1px solid silver;
+            border-radius: 10px;
+        }
+        .checkbox-class:hover .x-class{
+            visibility: visible;
+        }
+        .x-class {
+            color: red;
+            visibility: hidden;
+        }
+        .x-class:hover {
+            cursor: pointer;
+        }
+        @media screen and (max-width: 768px) {
+            .single-checkbox-class {
+                width: 100%;
+            }
+        }
+        @media screen and (min-width: 768px) and (max-width: 992px) {
+            .single-checkbox-class {
+                width: 50%;
+            }
+        }
+        @media screen and (min-width: 992px) and (max-width: 1200px) {
+            .single-checkbox-class {
+                width: 33%;
+            }
+        }
+        @media screen and (min-width: 1200px) {
+            .single-checkbox-class {
+                width: 25%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="single-checkbox-class" v-for="(i, index) in check_box_data">
+        <div class="checkbox-class">
+            <input type="checkbox" v-model="i.state" @click="selectFun(index)" /> 
+            <span class="span-class">{{i.msg}}</span>
+            <span class="x-class" @click="cancelFun(index)">X</span>
+        </div>
+    </div>
+    <hr/>
+    <input type="checkbox" v-model="check_value" @click="chooseAllFun" />全选/全不选
+    <br>
+    <button @click="deleteChosenFun">删除已选中的</button>
+    <br>
+    <input type="text" name="inputbox" v-model="input_data" @keyup.enter="sumbmitFun" />
+</div>
+<script>
+    new Vue({   
+        el: "#app", 
+        data: {  
+            msg: 'Welcome to Your Vue.js App',
+            check_box_data: [{
+                state: false,
+                msg: 'option1'
+            }, {
+                state: false,
+                msg: 'option2'
+            }],
+            input_data: '',
+            check_value: false
+        },
+        mounted() {
+            if (sessionStorage.check_box_data) {
+                this.check_box_data = JSON.parse(sessionStorage.check_box_data)
+            }
+        },
+        // beforeDestroy() {
+        updated() {
+            sessionStorage.check_box_data = JSON.stringify(this.check_box_data)
+        },
+        methods: {
+            /**
+             * 选择框取消或选中
+             */
+            selectFun:function(index) {
+                var flag = true
+                for (var i in this.check_box_data) {
+                    if (i != index && !this.check_box_data[i].state) {
+                        flag = false
+                        break
+                    } else if (i == index && this.check_box_data[i].state) {
+                        flag = false
+                        break
+                    }
+                }
+                if (flag) {
+                    this.check_value = true
+                } else {
+                    this.check_value = false
+                }
+            },
+            /**
+             * 添加新的选项
+             */
+            sumbmitFun: function() {
+                this.check_box_data.push({
+                    state: false,
+                    msg: this.input_data
+                })
+                this.input_data = ''
+            },
+            /**
+             * 删除选项
+             */
+            cancelFun: function(index) {
+                var result = confirm("确定要删除吗")
+                if (result) {
+                    this.check_box_data.splice(index, 1)
+                }
+            },
+            /**
+             * 全选或者全不选
+             */
+            chooseAllFun() {
+                var _this = this
+                /** 选项全改为true/false */
+                var changeBoolean = function(bool) {
+                    for (var i in _this.check_box_data) {
+                        _this.check_box_data[i].state = bool
+                    }
+                }
+                if(this.check_value) {
+                    changeBoolean(false)
+                } else {
+                    changeBoolean(true)
+                }
+            },
+            /**
+             * 删除已选中的
+             */
+            deleteChosenFun() {
+                for (var i in this.check_box_data) {
+                    if (this.check_box_data[i].state) {
+                        this.check_box_data.splice(i, 1)
+                        this.deleteChosenFun()
+                        break
+                    }
+                }
+            }
+        }
+    })
+</script>
+</body>
+</html>
